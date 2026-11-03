@@ -61,7 +61,7 @@
     .audio-settings { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; font-size: 13px; color: #475569; }
     .audio-settings select { padding: 5px 8px; border-radius: 6px; border: 1px solid #CBD5E1; background: white; }
 
-    /* Tabs 1 hàng ngang duy nhất */
+    /* Tabs */
     .tab-nav { 
       display: flex; 
       gap: 4px; 
@@ -266,7 +266,6 @@
     </div>
   </div>
 
-  <!-- Thanh điều hướng Tab 1 hàng ngang duy nhất -->
   <div class="tab-nav">
     <button class="tab-btn active" onclick="switchTab('listen', this)">🎧 Nghe</button>
     <button class="tab-btn" onclick="switchTab('speak', this)">🎤 Nói (Role-play)</button>
@@ -276,7 +275,6 @@
     <button class="tab-btn" onclick="switchTab('grammar', this)">✏️ Grammar</button>
   </div>
 
-  <!-- Tab 1: Luyện Nghe -->
   <div id="tab-listen" class="tab-content active">
     <div style="margin-bottom: 12px; display: flex; justify-content: flex-end;">
       <button class="btn btn-primary" onclick="toggleBlindMode()" id="btn-blind">🙈 Bật Giấu Chữ (Luyện Nghe Bằng Tai)</button>
@@ -284,7 +282,6 @@
     <div id="listen-container"></div>
   </div>
 
-  <!-- Tab 2: Luyện Nói & Đóng Vai -->
   <div id="tab-speak" class="tab-content">
     <div class="roleplay-panel" id="roleplay-panel">
       <div>
@@ -300,7 +297,6 @@
     <div id="speak-container"></div>
   </div>
 
-  <!-- Tab 3: Nghe - Hiểu -->
   <div id="tab-listen-quiz" class="tab-content">
     <div style="background: #F0FDFA; border: 1px solid #99F6E4; padding: 12px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; color: #0F766E;">
       👂 <b>Luyện phản xạ tai:</b> Bé hãy bấm nút <b>"🔊 Bấm Nghe Câu Này"</b>, chú ý nghe thật kỹ xem máy đọc từ gì rồi chọn đúng câu văn bên dưới nhé!
@@ -313,7 +309,6 @@
     </div>
   </div>
 
-  <!-- Tab 4: Quiz -->
   <div id="tab-quiz" class="tab-content">
     <div id="quiz-container"></div>
     <div class="action-row">
@@ -323,7 +318,6 @@
     </div>
   </div>
 
-  <!-- Tab 5: Từ Vựng -->
   <div id="tab-vocab" class="tab-content">
     <div class="vocab-toolbar">
       <span style="font-size: 14px; color: #64748B;">💡 Bấm vào nghĩa tiếng Việt để sửa | Bấm ✕ để xóa từ</span>
@@ -334,7 +328,6 @@
       </div>
     </div>
 
-    <!-- Khung nhập riêng cho Từ Vựng -->
     <div id="vocab-import-box" class="vocab-import-box">
       <div style="font-size: 13.5px; font-weight: bold; color: #334155; margin-bottom: 6px;">
         📝 Dán danh sách từ vựng dạng: <code>tiếng anh: tiếng việt</code> (mỗi từ một dòng)
@@ -349,7 +342,6 @@
     <div class="vocab-grid" id="vocab-container"></div>
   </div>
 
-  <!-- Tab 6: Grammar -->
   <div id="tab-grammar" class="tab-content">
     <div class="grammar-text" id="grammar-container"></div>
     <div class="action-row">
@@ -361,7 +353,6 @@
   </div>
 </div>
 
-<!-- Modal 1: Kiểm Tra Ghi Nhớ Từ Vựng -->
 <div id="vocab-quiz-modal" class="modal-overlay">
   <div class="modal-card">
     <div class="modal-header">
@@ -425,7 +416,6 @@
   </div>
 </div>
 
-<!-- Modal 2: Thử Thách Sắp Xếp Câu Ngữ Pháp -->
 <div id="sentence-scramble-modal" class="modal-overlay">
   <div class="modal-card">
     <div class="modal-header">
@@ -460,6 +450,10 @@
 </div>
 
 <script>
+  // TỰ ĐỘNG PHÂN TÁCH KHO LƯU TRỮ THEO ĐƯỜNG DẪN DỰ ÁN GITHUB PAGES
+  const projectPath = window.location.pathname.split('/').filter(Boolean)[0] || 'default_app';
+  const STORAGE_KEY = `english_app_units_${projectPath}`;
+
   let stars = 0;
   let attempts = 3;
   let currentQuizData = [];
@@ -557,6 +551,7 @@
     if (lower.includes('ee')) return lower.replace('ee', 'ea');
     if (lower.includes('a')) return lower.replace('a', 'o');
     if (lower.includes('e')) return lower.replace('e', 'a');
+    if (lower.includes('i')) return lower.replace('i', 'e');
     return lower + "s";
   }
 
@@ -585,7 +580,7 @@ Child: Yes, she drank cold water and now has a sore throat!`;
 
   function getStoredUnits() {
     try {
-      const stored = JSON.parse(localStorage.getItem('english_app_units'));
+      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
       if (Array.isArray(stored) && stored.length > 0) return stored;
     } catch(e) {}
     return [{ id: 1, title: "Unit 8: Health", text: defaultText, customVocab: defaultVocabList }];
@@ -600,7 +595,7 @@ Child: Yes, she drank cold water and now has a sore throat!`;
     const newTitle = prompt("Nhập tiêu đề mới cho Unit này:", unit.title || "Bài học mới");
     if (newTitle !== null && newTitle.trim() !== "") {
       unit.title = newTitle.trim();
-      localStorage.setItem('english_app_units', JSON.stringify(units));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(units));
       renderUnitDropdown();
     }
   }
@@ -612,7 +607,7 @@ Child: Yes, she drank cold water and now has a sore throat!`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `bai_hoc_tieng_anh_${new Date().toISOString().slice(0,10)}.json`;
+    a.download = `bai_hoc_${projectPath}_${new Date().toISOString().slice(0,10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -638,11 +633,13 @@ Child: Yes, she drank cold water and now has a sore throat!`;
 
         if (validUnits.length > 0) {
           units = validUnits;
-          localStorage.setItem('english_app_units', JSON.stringify(units));
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(units));
           currentUnitId = units[0].id;
           renderUnitDropdown();
           loadUnit(currentUnitId);
-          alert(`Đã mở thành công ${units.length} bài học từ file!`);
+          alert(`Đã mở thành công ${units.length} bài học từ file vào dự án ${projectPath}!`);
+        } else {
+          alert("Không tìm thấy bài học hợp lệ trong file!");
         }
       } catch (err) { alert("Lỗi đọc file: " + err.message); }
     };
@@ -715,7 +712,7 @@ Child: Yes, she drank cold water and now has a sore throat!`;
       text: "Doctor: What's the matter with you?\nChild: I have a cough and a temperature.", 
       customVocab: [] 
     });
-    localStorage.setItem('english_app_units', JSON.stringify(units));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(units));
     currentUnitId = newId;
     renderUnitDropdown();
     loadUnit(newId);
@@ -726,7 +723,7 @@ Child: Yes, she drank cold water and now has a sore throat!`;
     if (!confirm("Bạn có chắc chắn muốn xóa bài học này?")) return;
     units = units.filter(u => u.id !== currentUnitId);
     currentUnitId = units[0].id;
-    localStorage.setItem('english_app_units', JSON.stringify(units));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(units));
     renderUnitDropdown();
     loadUnit(currentUnitId);
   }
@@ -753,7 +750,7 @@ Child: Yes, she drank cold water and now has a sore throat!`;
     const idx = units.findIndex(u => u.id === currentUnitId);
     if (idx !== -1) {
       units[idx].text = rawText;
-      localStorage.setItem('english_app_units', JSON.stringify(units));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(units));
       renderLesson(units[idx]);
     }
     alert("Đã lưu và cập nhật bài đọc thành công!");
@@ -794,7 +791,7 @@ Child: Yes, she drank cold water and now has a sore throat!`;
     const idx = units.findIndex(u => u.id === currentUnitId);
     if (idx !== -1) {
       units[idx].customVocab = newVocabList;
-      localStorage.setItem('english_app_units', JSON.stringify(units));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(units));
       renderVocabTab(units[idx]);
       toggleVocabImportBox();
       alert(`Đã cập nhật ${newVocabList.length} từ vựng vào Tab Từ Vựng!\nCác Tab Nghe, Nói, Grammar vẫn giữ nguyên bài đọc.`);
@@ -1356,7 +1353,7 @@ Child: Yes, she drank cold water and now has a sore throat!`;
         } else {
           exists.meaning = kidsDictionary[cleanWord.toLowerCase()];
         }
-        localStorage.setItem('english_app_units', JSON.stringify(units));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(units));
         renderVocabTab(unit);
       }
     }
@@ -1368,7 +1365,7 @@ Child: Yes, she drank cold water and now has a sore throat!`;
 
     if (!unit.customVocab) unit.customVocab = getCurrentDisplayedVocabList();
     unit.customVocab = unit.customVocab.filter(v => v.word.toLowerCase() !== word.toLowerCase());
-    localStorage.setItem('english_app_units', JSON.stringify(units));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(units));
     renderVocabTab(unit);
   }
 
@@ -1388,7 +1385,7 @@ Child: Yes, she drank cold water and now has a sore throat!`;
       const currentList = getCurrentDisplayedVocabList();
       if (currentList.length > 0) {
         unit.customVocab = currentList;
-        localStorage.setItem('english_app_units', JSON.stringify(units));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(units));
       }
     }
   }
@@ -1501,7 +1498,6 @@ Child: Yes, she drank cold water and now has a sore throat!`;
     loadVocabQuizQuestion();
   }
 
-  // THUẬT TOÁN TRẮC NGHIỆM CHUẨN: LẤY ĐÁP ÁN GÂY NHIỄU NGAY TRONG BÀI ĐANG HỌC
   function loadVocabQuizQuestion() {
     if (vqCurrentIndex >= vqItems.length) {
       if (vqMode !== 'flashcard') {
@@ -1557,15 +1553,12 @@ Child: Yes, she drank cold water and now has a sore throat!`;
       const optionsContainer = document.getElementById('vq-options');
       optionsContainer.innerHTML = '';
 
-      // 1. ƯU TIÊN LẤY TỪ TRONG CHÍNH DANH SÁCH BÀI HỌC HIỆN TẠI ĐỂ GÂY NHIỄU CÙNG CHỦ ĐỀ
       let localWrongPool = vqItems
         .filter(item => item.meaning.toLowerCase().trim() !== current.meaning.toLowerCase().trim())
         .map(item => item.meaning.trim());
 
-      // Lọc trùng lặp
       localWrongPool = [...new Set(localWrongPool)].sort(() => Math.random() - 0.5);
 
-      // Nếu bài học có ít hơn 4 từ, bổ sung thêm từ điển chung
       if (localWrongPool.length < 3) {
         const globalWrongPool = Object.values(kidsDictionary).filter(m => 
           m.toLowerCase().trim() !== current.meaning.toLowerCase().trim() && !localWrongPool.includes(m)
@@ -1851,7 +1844,6 @@ Child: Yes, she drank cold water and now has a sore throat!`;
   function openSentenceScrambleModal() {
     let pairs = [];
 
-    // Duyệt chính xác theo từng cặp: [Câu hỏi -> Câu trả lời liền kề]
     for (let i = 0; i < currentDialogueList.length - 1; i += 2) {
       const qItem = currentDialogueList[i];
       const aItem = currentDialogueList[i + 1];
@@ -1864,7 +1856,6 @@ Child: Yes, she drank cold water and now has a sore throat!`;
       }
     }
 
-    // Trường hợp bài đọc lẻ câu hoặc chỉ có câu đơn lẻ
     if (pairs.length === 0 && currentDialogueList.length > 0) {
       currentDialogueList.forEach(item => {
         pairs.push({
@@ -1911,12 +1902,10 @@ Child: Yes, she drank cold water and now has a sore throat!`;
     document.getElementById('sq-score').innerText = `Đúng: ${sqCorrectCount} ⭐`;
     document.getElementById('sq-feedback').innerText = '';
 
-    // Luôn hiển thị đúng câu hỏi ở trên
     document.getElementById('sq-context-speaker').innerHTML = `💬 <b>${qItem.speaker || 'Câu hỏi'}</b>:`;
     document.getElementById('sq-context-text').innerText = `"${qItem.body}"`;
     document.getElementById('sq-task-title').innerHTML = `👉 Bé hãy sắp xếp câu trả lời của [ <b>${aItem.speaker || 'mình'}</b> ]:`;
 
-    // Tách các từ trong câu trả lời cần xếp
     const rawWords = aItem.body.trim().split(/\s+/);
     let shuffled = [...rawWords];
     let tries = 0;
